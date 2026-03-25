@@ -4,8 +4,9 @@ public class EarthRotationController : MonoBehaviour
 {
     public TimeController timeController;
     public float axialTiltDeg = 23.44f;
-    [Tooltip("Offset so mesh longitude 0 aligns with astronomical 0° (GMST reference). Set for your mesh seam/orientation.")]
-    public float textureCalibration = 90f;
+    // Mesh longitude convention: this project uses +X as the prime meridian direction.
+    // If a texture/mesh was authored with 0° longitude on +Z, convert by rotating -90° around Y.
+    private const float PrimeMeridianXAxisOffsetDeg = -90f;
 
     private float lastRotationAngle = 0f;
 
@@ -46,7 +47,7 @@ public class EarthRotationController : MonoBehaviour
 
         // Keep angle normalized to [0, 360) to avoid large-number drift.
         double normalizedGmst = (gmst % 360.0 + 360.0) % 360.0;
-        double angle = normalizedGmst + textureCalibration;
+        double angle = normalizedGmst + PrimeMeridianXAxisOffsetDeg;
 
         return (float)((angle % 360.0 + 360.0) % 360.0);
     }
