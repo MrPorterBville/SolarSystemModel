@@ -4,15 +4,19 @@ public class EarthRotationController : MonoBehaviour
 {
     public TimeController timeController;
     public float axialTiltDeg = 23.44f;
-    [Tooltip("Adjust this until London faces the Sun at 12:00 UTC")]
-    public float textureCalibration = 180f;
+    // Mesh longitude convention: this project uses +X as the prime meridian direction.
+    // If a texture/mesh was authored with 0° longitude on +Z, convert by rotating -90° around Y.
+    private const float PrimeMeridianXAxisOffsetDeg = -90f;
 
     private float lastRotationAngle = 0f;
 
     void Start()
     {
-        // Tilt around Z so the lean is along the X-axis
-        transform.localRotation = Quaternion.Euler(0, 0, axialTiltDeg);
+        // Tilt around X so the spin axis leans along +Z.
+        // This matches Earth's seasonal orientation in this project's orbital frame:
+        // - March/September equinox: axis ~perpendicular to Sun direction
+        // - June solstice: north pole tilted toward the Sun
+        transform.localRotation = Quaternion.Euler(axialTiltDeg, 0, 0);
         lastRotationAngle = GetCurrentTotalAngle();
     }
 
@@ -43,7 +47,7 @@ public class EarthRotationController : MonoBehaviour
 
         // Keep angle normalized to [0, 360) to avoid large-number drift.
         double normalizedGmst = (gmst % 360.0 + 360.0) % 360.0;
-        double angle = normalizedGmst + textureCalibration;
+        double angle = normalizedGmst + PrimeMeridianXAxisOffsetDeg;
 
         return (float)((angle % 360.0 + 360.0) % 360.0);
     }
