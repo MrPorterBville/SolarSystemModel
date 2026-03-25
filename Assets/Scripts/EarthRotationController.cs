@@ -41,7 +41,10 @@ public class EarthRotationController : MonoBehaviour
 
         double gmst = 280.46061837 + 360.98564736629 * d + 0.000387933 * T * T - (T * T * T / 38710000.0);
 
-        // Return the GMST + your texture offset
-        return (float)(gmst % 360.0) + textureCalibration;
+        // Keep angle normalized to [0, 360) to avoid large-number drift.
+        double normalizedGmst = (gmst % 360.0 + 360.0) % 360.0;
+        double angle = normalizedGmst + textureCalibration;
+
+        return (float)((angle % 360.0 + 360.0) % 360.0);
     }
 }
